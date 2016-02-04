@@ -17,7 +17,8 @@ the counter-clockwise rotation is basically there). All 7 tetriminoes are workin
 * Random Generator (https://tetris.wiki/Random_Generator)
 * Next piece preview
 
-## Key binding:
+## Key bindings:
 At the moment, pieces are moved with left and right arrow, hard dropped with down arrow and rotated with the up arrow
 
-## Requirements: the game is developed in Python 3 and requires the pysdl2 library (and SDL2, of course).
+## Requirements: 
+The game is developed in Python 3 and requires the pysdl2 library (and SDL2, of course).
