@@ -69,6 +69,13 @@ class VirtualPieceChecker(sdl2.ext.Applicator):
                 
                 pd.boardposition.x = vp.boardposition.x
                 pd.boardposition.y = vp.boardposition.y
+                old_y = vp.boardposition.y
+                while not pd.blocked:
+                    pd.blocked = self._out_of_board(vp) or self._board_collision(vp) 
+                    pd.ghost_y = vp.boardposition.y
+                    vp.boardposition.y += 1
+                pd.blocked = False
+                vp.boardposition.y = old_y 
                 pd.shape = vp.shape
                 pd.rot = vp.rot
                 
@@ -93,7 +100,12 @@ class PieceMovement:
         piece.virtualpiece.rot = new_index
         piece.virtualpiece.shape = piece.virtualpiece.rotmap[new_index]
 
-    
+    def drop(self,piece):
+        #piece.piecedata.boardposition.y = piece.piecedata.ghost_y -1
+        piece.virtualpiece.boardposition.y = piece.piecedata.ghost_y -1
+        piece.piecedata.moved = True
+        
+        
     def rotate_left(self, piece):
         self.rotate(piece, -1)
     
@@ -118,6 +130,7 @@ class PieceData(VirtualPiece):
         super(PieceData, self).__init__(rotation, rotation_map, color, piecetype, posx, posy, bounding_box)  
         self.blocked = False
         self.moved = False
+        self.ghost_y = 0
 
         
 class PieceFactory:
