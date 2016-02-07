@@ -16,6 +16,7 @@ the counter-clockwise rotation is basically there). All 7 tetriminoes are workin
 * Full SRS (https://tetris.wiki/SRS) including the prescribed wall kicks
 * Random Generator (https://tetris.wiki/Random_Generator)
 * Next piece preview
+* Ghost piece functionality
 
 ## Key bindings:
 At the moment, pieces are moved with left and right arrow, hard dropped with down arrow and rotated with the up arrow
