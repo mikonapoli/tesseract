@@ -14,7 +14,7 @@ from Board import *
 def run():
     #Initialize graphic system and control systems
     sdl2.ext.init()
-    window = sdl2.ext.Window("Tetris", size = (800,600))
+    window = sdl2.ext.Window("Tesseract", size = (800,600))
     background = window.get_surface()
     world = sdl2.ext.World()
 
@@ -65,20 +65,18 @@ def run():
             if event.type == sdl2.SDL_KEYDOWN:
                 if event.key.keysym.sym == sdl2.SDLK_RIGHT:
                     piece_mover.move_right(current_piece)
-                    world.process()
+
                 if event.key.keysym.sym == sdl2.SDLK_LEFT:
                     piece_mover.move_left(current_piece)
-                    world.process()
+
                 if event.key.keysym.sym == sdl2.SDLK_UP:
                     piece_mover.rotate(current_piece)
-                    world.process()
+
                 if event.key.keysym.sym == sdl2.SDLK_DOWN:
-                    while not current_piece.piecedata.blocked:
-                        
-                        piece_mover.move_down(current_piece)
-                        world.process()
+
+                    piece_mover.drop(current_piece)
     
-                    world.process()
+                world.process()
 
                     
         sdl2.ext.fill(background,WHITE)
@@ -99,7 +97,6 @@ def run():
                 next_piece.delete()
                 next_piece = piecefactory.get_next_piece(world)
                 np_board.piece = next_piece
-                #print(np_board.piece.piecedata.type)
                 
 
             world.process()
@@ -109,7 +106,6 @@ def run():
 
         boardrenderer.render_board(current_piece)
         next_piece_renderer.render_board(next_piece)
-        #print(next_piece.piecedata.boardposition.x, next_piece.piecedata.boardposition.y)
         window.refresh()
     return 0
 

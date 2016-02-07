@@ -15,7 +15,7 @@ class BoardRenderer(sdl2.ext.Renderer):
         self.hstep = int(board_surface.w // self.bsize[0])
         self.vstep = int(board_surface.h // (self.bsize[1]- self.hid))
 
-        self.color_code = {1 : YELLOW, 2 : CYAN, 3 : BLUE, 4: ORANGE, 5: GREEN, 6: PURPLE, 7:RED}
+        self.color_code = {1 : YELLOW, 2 : CYAN, 3 : BLUE, 4: ORANGE, 5: GREEN, 6: PURPLE, 7:RED, 9:BLACK}
         self.clear(color = BLACK)
     
     def render_board(self, piece):
@@ -42,11 +42,18 @@ class BoardRenderer(sdl2.ext.Renderer):
         for x in range(bbox[1]+1):
             for y in range(bbox[2]+1):
                 s = piece.piecedata.shape[y][x]
-                if s != 0 and piece.piecedata.boardposition.y+y >= 2:
+                if s != 0:
+                    #Render the ghost piece
                     to_fill.append(
+                    ((pos_x + (piece.piecedata.boardposition.x+x)*self.hstep, pos_y + ((piece.piecedata.ghost_y-3)+y)*self.vstep, 
+                    self.hstep, self.vstep), 9))
+                    #Render the actual piece
+                    if piece.piecedata.boardposition.y+y >= 2:
+                        to_fill.append(
                     ((pos_x + (piece.piecedata.boardposition.x+x)*self.hstep, pos_y + ((piece.piecedata.boardposition.y-2)+y)*self.vstep, 
                     self.hstep, self.vstep), self.color_code[piece.piecedata.color_code]
                     ))
+                    
         
         for s in to_fill:
             self.fill(s[0],s[1])
