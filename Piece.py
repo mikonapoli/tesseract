@@ -12,10 +12,10 @@ class VirtualPieceChecker(sdl2.ext.Applicator):
 
     def _out_of_board(self, piece):
 
-        if (piece.boardposition.x + piece.bbox[piece.rot][0] < 0 or
-            piece.boardposition.x + piece.bbox[piece.rot][1] >=
+        if (piece.x + piece.bbox[piece.rot][0] < 0 or
+            piece.x + piece.bbox[piece.rot][1] >=
             self.board_size[0] or
-                piece.boardposition.y + piece.bbox[piece.rot][2] >=
+                piece.y + piece.bbox[piece.rot][2] >=
                 self.board_size[1]):
 
             return True
@@ -29,8 +29,8 @@ class VirtualPieceChecker(sdl2.ext.Applicator):
         for i in range(bbox[0], bbox[1] + 1):
             for j in range(bbox[2] + 1):
                 if (piece.shape[j][i] != 0 and
-                        self.board.boardstatus.map[piece.boardposition.y + j]
-                        [piece.boardposition.x + i] != 0):
+                        self.board.boardstatus.map[piece.y + j]
+                        [piece.x + i] != 0):
                     collision = True
 
         return collision
@@ -56,48 +56,48 @@ class VirtualPieceChecker(sdl2.ext.Applicator):
                     ind = pd.rot
                 for test in kickmap[ind]:
                     if pd.blocked:
-                        vp.boardposition.x = pd.boardposition.x + \
+                        vp.x = pd.x + \
                             (rotation_type * test[0])
-                        vp.boardposition.y = pd.boardposition.y + \
+                        vp.y = pd.y + \
                             (rotation_type * test[1])
                         pd.blocked = self._out_of_board(
                             vp) or self._board_collision(vp)
 
             if pd.blocked:
 
-                vp.boardposition.x = pd.boardposition.x
-                vp.boardposition.y = pd.boardposition.y
+                vp.x = pd.x
+                vp.y = pd.y
 
                 vp.shape = pd.shape
                 vp.rot = pd.rot
 
             else:
 
-                pd.boardposition.x = vp.boardposition.x
-                pd.boardposition.y = vp.boardposition.y
-                old_y = vp.boardposition.y
+                pd.x = vp.x
+                pd.y = vp.y
+                old_y = vp.y
                 while not pd.blocked:
                     pd.blocked = self._out_of_board(
                         vp) or self._board_collision(vp)
-                    pd.ghost_y = vp.boardposition.y
-                    vp.boardposition.y += 1
+                    pd.ghost_y = vp.y
+                    vp.y += 1
                 pd.blocked = False
-                vp.boardposition.y = old_y
+                vp.y = old_y
                 pd.shape = vp.shape
                 pd.rot = vp.rot
 
 
 class PieceMovement:
     def move_left(self, piece):
-        piece.virtualpiece.boardposition.x -= 1
+        piece.virtualpiece.x -= 1
         piece.piecedata.moved = True
 
     def move_right(self, piece):
-        piece.virtualpiece.boardposition.x += 1
+        piece.virtualpiece.x += 1
         piece.piecedata.moved = True
 
     def move_down(self, piece):
-        piece.virtualpiece.boardposition.y += 1
+        piece.virtualpiece.y += 1
         piece.piecedata.moved = True
 
     def rotate(self, piece, mov=1):
@@ -108,8 +108,8 @@ class PieceMovement:
         piece.virtualpiece.shape = piece.virtualpiece.rotmap[new_index]
 
     def drop(self, piece):
-        # piece.piecedata.boardposition.y = piece.piecedata.ghost_y -1
-        piece.virtualpiece.boardposition.y = piece.piecedata.ghost_y - 1
+        # piece.piecedata.y = piece.piecedata.ghost_y -1
+        piece.virtualpiece.y = piece.piecedata.ghost_y - 1
         piece.piecedata.moved = True
 
     def rotate_left(self, piece):
@@ -128,7 +128,8 @@ class VirtualPiece(object):
         self.shape = self.rotmap[self.rot]
         # self.w = len(self.shape[0])
         # self.h = len(self.shape)
-        self.boardposition = BoardPosition(posx, posy)
+        self.x = posx
+        self.y = posy
 
 
 class PieceData(VirtualPiece):
@@ -171,13 +172,6 @@ class PieceFactory:
         piece = Piece(world, cat_entry[0], x_pos, y_pos, 0,
                       cat_entry[1], cat_entry[2], cat_entry[3])
         return piece
-
-
-class BoardPosition(object):
-    def __init__(self, px, py):
-        super(BoardPosition, self).__init__()
-        self.x = px
-        self.y = py
 
 
 class Piece(sdl2.ext.Entity):

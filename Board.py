@@ -25,10 +25,11 @@ class BoardUpdater(sdl2.ext.Applicator):
         for i in range(bbox[2] + 1):
             for j in range(bbox[0], bbox[1] + 1):
                 a = piece.piecedata.shape[i][j]
-                pos = piece.piecedata.boardposition
+                pos_x = piece.piecedata.x
+                pos_y = piece.piecedata.y
                 if a != 0:
                     ccode = piece.piecedata.color_code
-                    boardstatus.map[i + pos.y][j + pos.x] = ccode
+                    boardstatus.map[i + pos_y][j + pos_x] = ccode
 
     def _check_and_delete_rows(self, boardstatus):
         # deleted_rows = 0
