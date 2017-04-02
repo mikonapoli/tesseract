@@ -9,6 +9,7 @@ CYAN = sdl2.ext.Color(0, 255, 255)
 PURPLE = sdl2.ext.Color(128, 0, 128)
 YELLOW = sdl2.ext.Color(255, 255, 0)
 ORANGE = sdl2.ext.Color(255, 140, 0)
+GREY = sdl2.ext.Color(100, 100, 100)
 
 
 PIECES = {
