@@ -67,7 +67,30 @@ class VirtualPieceChecker(sdl2.ext.Applicator):
                             vp) or self._board_collision(vp)
 
             if pd.blocked:
-
+                if piece_rotated:
+                    # Wall kick
+                    kickmap = None
+                    if pd.type in WALL_KICK:
+                        kickmap = WALL_KICK[pd.type]
+                    else:
+                        kickmap = WALL_KICK["X"]
+                    # Left or right rotation
+                    if vp.rot - pd.rot in (1, -3):
+                        rotation_type = 1
+                        ind = vp.rot
+                    else:
+                        rotation_type = -1
+                        ind = pd.rot
+                    # Try each position in the kickmap to find if it fits
+                    for test in kickmap[ind]:
+                        if pd.blocked:
+                            vp.x = pd.x + \
+                                (rotation_type * test[0])
+                            vp.y = pd.y + \
+                                (rotation_type * test[1])
+                            pd.blocked = self._out_of_board(
+                                vp) or self._board_collision(vp)
+                # Virtual piece reset back to actual piece
                 vp.x = pd.x
                 vp.y = pd.y
 
@@ -75,19 +98,22 @@ class VirtualPieceChecker(sdl2.ext.Applicator):
                 vp.rot = pd.rot
 
             else:
-
+                # Piece is free to change position. Actual piece gets position
+                # position of virtual piece
                 pd.x = vp.x
                 pd.y = vp.y
+                pd.shape = vp.shape
+                pd.rot = vp.rot
+                # Find the position of ghost piece moving down the virtual
+                # until it is blocked, then move back the virtual piece
                 old_y = vp.y
                 while not pd.blocked:
                     pd.blocked = self._out_of_board(
                         vp) or self._board_collision(vp)
-                    pd.ghost_y = vp.y
                     vp.y += 1
-                pd.blocked = False
+                pd.ghost_y = vp.y-1
                 vp.y = old_y
-                pd.shape = vp.shape
-                pd.rot = vp.rot
+                pd.blocked = False
 
 
 class VirtualPiece(object):
@@ -100,8 +126,6 @@ class VirtualPiece(object):
         self.bbox = bounding_box
         self.color_code = color
         self.shape = self.rotmap[self.rot]
-        # self.w = len(self.shape[0])
-        # self.h = len(self.shape)
         self.x = posx
         self.y = posy
 

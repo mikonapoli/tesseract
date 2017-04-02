@@ -21,11 +21,15 @@ def run():
     bsize = board.get_board_size()
     board_updater = BD.BoardUpdater()
 
-    step = min(30, int((window.size[0] - 20) / (bsize[0] * 2)),
-               int((window.size[1] - 20) / (bsize[1] - 2)))
+    step = min(30, int((window.size[0] - 20) / ((bsize[0] + 2) * 2)),
+               int((window.size[1] - 20) / (bsize[1])))
 
-    board_surface = sdl2.ext.subsurface(
-        background, (10, 10, bsize[0] * step, (bsize[1] - 2) * step))
+    board_background = sdl2.ext.subsurface(
+        background, (10, 10, (bsize[0] + 2) * step, (bsize[1]) * step))
+
+    board_surface = sdl2.ext.subsurface(board_background,
+                                        (step, step, bsize[0] * step,
+                                         (bsize[1] - 2) * step))
     next_piece_surface = sdl2.ext.subsurface(background, (int(
         window.size[0] / 2) + 10,
         int(window.size[1] / 2) + 10, 4 * step, 4 * step))
@@ -56,7 +60,6 @@ def run():
     running = True
     last_time = sdl2.SDL_GetTicks()
     while running:
-
         events = sdl2.ext.get_events()
         for event in events:
             if event.type == sdl2.SDL_QUIT:
@@ -73,12 +76,12 @@ def run():
                     current_piece.rotate()
 
                 if event.key.keysym.sym == sdl2.SDLK_DOWN:
-
                     current_piece.drop()
 
                 world.process()
 
-        sdl2.ext.fill(background, CONST.WHITE)
+        sdl2.ext.fill(background, CONST.BLACK)
+        sdl2.ext.fill(board_background, CONST.WHITE)
 
         if sdl2.SDL_GetTicks() - last_time >= 1000:
             current_piece.move_down()
