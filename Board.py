@@ -6,9 +6,7 @@ from Piece import Piece
 class BoardStatus(object):
     def __init__(self, map):
         super(BoardStatus, self).__init__()
-
         self.map = map
-
         self.columns = len(self.map[0])
         self.rows = len(self.map)
         self.to_update = False
@@ -39,13 +37,11 @@ class BoardUpdater(sdl2.ext.Applicator):
             for x in boardstatus.map[r]:
                 to_delete = to_delete and (x != 0)
             if to_delete:
-
                 boardstatus.map.pop(r)
                 boardstatus.map.insert(0, [0] * s[0])
 
     def process(self, world, componentsets):
         for b, p in componentsets:
-
             if b.to_update:
                 self._update_board_status(p, b)
                 self._check_and_delete_rows(b)
@@ -59,5 +55,4 @@ class Board(sdl2.ext.Entity):
         self.piece = None
 
     def get_board_size(self):
-
         return (self.boardstatus.columns, self.boardstatus.rows)

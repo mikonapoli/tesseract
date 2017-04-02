@@ -32,7 +32,6 @@ def run():
 
     piecefactory = PC.PieceFactory()
     virtual_piece_checker = PC.VirtualPieceChecker(board)
-    piece_mover = PC.PieceMovement()
 
     current_piece = piecefactory.spawn_piece(world)
     board.piece = current_piece
@@ -65,24 +64,24 @@ def run():
                 break
             if event.type == sdl2.SDL_KEYDOWN:
                 if event.key.keysym.sym == sdl2.SDLK_RIGHT:
-                    piece_mover.move_right(current_piece)
+                    current_piece.move_right()
 
                 if event.key.keysym.sym == sdl2.SDLK_LEFT:
-                    piece_mover.move_left(current_piece)
+                    current_piece.move_left()
 
                 if event.key.keysym.sym == sdl2.SDLK_UP:
-                    piece_mover.rotate(current_piece)
+                    current_piece.rotate()
 
                 if event.key.keysym.sym == sdl2.SDLK_DOWN:
 
-                    piece_mover.drop(current_piece)
+                    current_piece.drop()
 
                 world.process()
 
         sdl2.ext.fill(background, CONST.WHITE)
 
         if sdl2.SDL_GetTicks() - last_time >= 1000:
-            piece_mover.move_down(current_piece)
+            current_piece.move_down()
 
             world.process()
 

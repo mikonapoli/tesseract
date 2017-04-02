@@ -2,11 +2,14 @@ import sdl2.ext
 from constants import PIECES, WALL_KICK
 from random import random
 
+# TODO: this should be a component, not a System.
+# System should be a collision detector
+
 
 class VirtualPieceChecker(sdl2.ext.Applicator):
     def __init__(self, board):
         super(VirtualPieceChecker, self).__init__()
-        self.componenttypes = (VirtualPiece, PieceData)
+        self.componenttypes = [VirtualPiece, PieceData]
         self.board_size = board.get_board_size()
         self.board = board
 
@@ -87,38 +90,9 @@ class VirtualPieceChecker(sdl2.ext.Applicator):
                 pd.rot = vp.rot
 
 
-class PieceMovement:
-    def move_left(self, piece):
-        piece.virtualpiece.x -= 1
-        piece.piecedata.moved = True
-
-    def move_right(self, piece):
-        piece.virtualpiece.x += 1
-        piece.piecedata.moved = True
-
-    def move_down(self, piece):
-        piece.virtualpiece.y += 1
-        piece.piecedata.moved = True
-
-    def rotate(self, piece, mov=1):
-        new_index = (piece.virtualpiece.rot +
-                     mov) % len(piece.virtualpiece.rotmap)
-
-        piece.virtualpiece.rot = new_index
-        piece.virtualpiece.shape = piece.virtualpiece.rotmap[new_index]
-
-    def drop(self, piece):
-        # piece.piecedata.y = piece.piecedata.ghost_y -1
-        piece.virtualpiece.y = piece.piecedata.ghost_y - 1
-        piece.piecedata.moved = True
-
-    def rotate_left(self, piece):
-        self.rotate(piece, -1)
-
-
 class VirtualPiece(object):
     def __init__(self, rotation, rotation_map, color,
-                 piecetype, posx, posy, bounding_box):
+                 piecetype, posx, posy, bounding_box, virtual=False):
 
         self.rot = rotation
         self.type = piecetype
@@ -177,10 +151,39 @@ class PieceFactory:
 class Piece(sdl2.ext.Entity):
     def __init__(self, world, piecetype, posx, posy,
                  rotation, rotationmap, color, rotpos):
-
         super(Piece, self).__init__()
-
         self.piecedata = PieceData(
             rotation, rotationmap, color, piecetype, posx, posy, rotpos)
         self.virtualpiece = VirtualPiece(
             rotation, rotationmap, color, piecetype, posx, posy, rotpos)
+
+    def move(self, mx=0, my=0, drop=False):
+        if drop:
+            self.virtualpiece.y = self.piecedata.ghost_y - 1
+        else:
+            self.virtualpiece.x += mx
+            self.virtualpiece.y += my
+        self.piecedata.moved = True
+
+    def move_left(self):
+        self.move(mx=-1)
+
+    def move_right(self):
+        self.move(mx=1)
+
+    def move_down(self):
+        self.move(my=1)
+
+    def drop(self):
+        self.move(drop=True)
+
+    def rotate(self, mov=1):
+        new_index = (self.virtualpiece.rot +
+                     mov) % len(self.virtualpiece.rotmap)
+
+        self.virtualpiece.rot = new_index
+        self.virtualpiece.shape = self.virtualpiece.rotmap[
+            new_index]
+
+    def rotate_left(self):
+        self.rotate(-1)
