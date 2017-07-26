@@ -3,7 +3,7 @@ import sdl2
 import sdl2.ext
 import graphics.renderers as GS
 
-import constants as CONST
+import graphics.constants as CONST
 
 import Piece as PC
 

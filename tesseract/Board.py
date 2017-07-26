@@ -1,5 +1,5 @@
 import sdl2.ext
-import constants as CONST
+from constants import DEFAULT_BOARD
 from Piece import Piece
 
 
@@ -49,7 +49,7 @@ class BoardUpdater(sdl2.ext.Applicator):
 
 
 class Board(sdl2.ext.Entity):
-    def __init__(self, world, map=CONST.DEFAULT_BOARD):
+    def __init__(self, world, map=DEFAULT_BOARD):
         super(Board, self).__init__()
         self.boardstatus = BoardStatus(map)
         self.piece = None
