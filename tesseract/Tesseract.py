@@ -1,7 +1,7 @@
 import sys
 import sdl2
 import sdl2.ext
-import GraphicSystem as GS
+import graphics.renderers as GS
 
 import constants as CONST
 
