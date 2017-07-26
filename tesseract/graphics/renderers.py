@@ -15,9 +15,8 @@ class BoardRenderer(sdl2.ext.Renderer):
         self.hstep = int(board_surface.w // self.bsize[0])
         self.vstep = int(board_surface.h // (self.bsize[1] - self.hid))
 
-        self.color_code = {1: CONST.YELLOW, 2: CONST.CYAN, 3: CONST.BLUE,
-                           4: CONST.ORANGE, 5: CONST.GREEN,
-                           6: CONST.PURPLE, 7: CONST.RED, 9: CONST.BLACK}
+        self.color_code = CONST.COLOR_CODE
+
         self.clear(color=CONST.BLACK)
 
     def render_board(self, piece):
