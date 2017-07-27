@@ -181,12 +181,9 @@ class Piece(sdl2.ext.Entity):
         self.virtualpiece = VirtualPiece(
             rotation, rotationmap, color, piecetype, posx, posy, rotpos)
 
-    def move(self, mx=0, my=0, drop=False):
-        if drop:
-            self.virtualpiece.y = self.piecedata.ghost_y - 1
-        else:
-            self.virtualpiece.x += mx
-            self.virtualpiece.y += my
+    def move(self, mx=0, my=0):
+        self.virtualpiece.x += mx
+        self.virtualpiece.y += my
         self.piecedata.moved = True
 
     def move_left(self):
@@ -199,7 +196,8 @@ class Piece(sdl2.ext.Entity):
         self.move(my=1)
 
     def drop(self):
-        self.move(drop=True)
+        self.virtualpiece.y = self.piecedata.ghost_y - 1
+        self.piecedata.moved = True
 
     def rotate(self, mov=1):
         new_index = (self.virtualpiece.rot +
