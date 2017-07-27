@@ -43,11 +43,9 @@ class VirtualPieceChecker(sdl2.ext.Applicator):
 
     def _wall_kick(self, vp, pd):
         # Wall kick
-        kickmap = None
+        kickmap = WALL_KICK["X"]
         if pd.type in WALL_KICK:
             kickmap = WALL_KICK[pd.type]
-        else:
-            kickmap = WALL_KICK["X"]
         # Left or right rotation
         if vp.rot - pd.rot in (1, -3):
             rotation_type = 1
