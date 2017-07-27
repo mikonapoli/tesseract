@@ -38,58 +38,40 @@ class VirtualPieceChecker(sdl2.ext.Applicator):
 
         return collision
 
+    def _is_piece_blocked(self, piece):
+        return self._out_of_board(piece) or self._board_collision(piece)
+
     def process(self, world, componentsets):
         for vp, pd in componentsets:
 
-            pd.blocked = self._out_of_board(vp) or self._board_collision(vp)
+            pd.blocked = self._is_piece_blocked(vp)
             piece_rotated = (vp.rot != pd.rot)
 
             # Wall kick implementation
             if pd.blocked and piece_rotated:
+                # Wall kick
                 kickmap = None
                 if pd.type in WALL_KICK:
                     kickmap = WALL_KICK[pd.type]
                 else:
                     kickmap = WALL_KICK["X"]
+                # Left or right rotation
                 if vp.rot - pd.rot in (1, -3):
                     rotation_type = 1
                     ind = vp.rot
                 else:
                     rotation_type = -1
                     ind = pd.rot
+                # Try each position in the kickmap to find if it fits
                 for test in kickmap[ind]:
                     if pd.blocked:
                         vp.x = pd.x + \
                             (rotation_type * test[0])
                         vp.y = pd.y + \
                             (rotation_type * test[1])
-                        pd.blocked = self._out_of_board(
-                            vp) or self._board_collision(vp)
+                        pd.blocked = self._is_piece_blocked(vp)
 
             if pd.blocked:
-                if piece_rotated:
-                    # Wall kick
-                    kickmap = None
-                    if pd.type in WALL_KICK:
-                        kickmap = WALL_KICK[pd.type]
-                    else:
-                        kickmap = WALL_KICK["X"]
-                    # Left or right rotation
-                    if vp.rot - pd.rot in (1, -3):
-                        rotation_type = 1
-                        ind = vp.rot
-                    else:
-                        rotation_type = -1
-                        ind = pd.rot
-                    # Try each position in the kickmap to find if it fits
-                    for test in kickmap[ind]:
-                        if pd.blocked:
-                            vp.x = pd.x + \
-                                (rotation_type * test[0])
-                            vp.y = pd.y + \
-                                (rotation_type * test[1])
-                            pd.blocked = self._out_of_board(
-                                vp) or self._board_collision(vp)
                 # Virtual piece reset back to actual piece
                 vp.x = pd.x
                 vp.y = pd.y
