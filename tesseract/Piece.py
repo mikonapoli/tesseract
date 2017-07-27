@@ -6,20 +6,20 @@ from random import random
 # System should be a collision detector
 
 
-class VirtualPieceChecker(sdl2.ext.Applicator):
-    def __init__(self, board):
-        super(VirtualPieceChecker, self).__init__()
-        self.componenttypes = [VirtualPiece, PieceData]
-        self.board_size = board.get_board_size()
-        self.board = board
+class CollisionSystem(sdl2.ext.Applicator):
+    def __init__(self):
+        super(CollisionSystem, self).__init__()
+        self.componenttypes = Piece,
+        self.board = None
 
     def _out_of_board(self, piece):
-
-        if (piece.x + piece.bbox[piece.rot][0] < 0 or
-            piece.x + piece.bbox[piece.rot][1] >=
-            self.board_size[0] or
-                piece.y + piece.bbox[piece.rot][2] >=
-                self.board_size[1]):
+        vp = piece.virtualpiece
+        board_size = self.board.get_board_size()
+        if (vp.x + vp.bbox[vp.rot][0] < 0 or
+            vp.x + vp.bbox[vp.rot][1] >=
+            board_size[0] or
+                vp.y + vp.bbox[vp.rot][2] >=
+                board_size[1]):
 
             return True
 
@@ -27,13 +27,14 @@ class VirtualPieceChecker(sdl2.ext.Applicator):
             return False
 
     def _board_collision(self, piece):
+        vp = piece.virtualpiece
         collision = False
-        bbox = piece.bbox[piece.rot]
+        bbox = vp.bbox[vp.rot]
         for i in range(bbox[0], bbox[1] + 1):
             for j in range(bbox[2] + 1):
-                if (piece.shape[j][i] != 0 and
-                        self.board.boardstatus.map[piece.y + j]
-                        [piece.x + i] != 0):
+                if (vp.shape[j][i] != 0 and
+                        self.board.boardstatus.map[vp.y + j]
+                        [vp.x + i] != 0):
                     collision = True
 
         return collision
@@ -41,7 +42,8 @@ class VirtualPieceChecker(sdl2.ext.Applicator):
     def _is_movement_blocked(self, piece):
         return self._out_of_board(piece) or self._board_collision(piece)
 
-    def _wall_kick(self, vp, pd):
+    def _wall_kick(self, piece):
+        vp, pd = piece.virtualpiece, piece.piecedata
         # Wall kick
         kickmap = WALL_KICK["X"]
         if pd.type in WALL_KICK:
@@ -58,39 +60,30 @@ class VirtualPieceChecker(sdl2.ext.Applicator):
             if pd.blocked:
                 vp.x = pd.x + (rotation_type * test[0])
                 vp.y = pd.y + (rotation_type * test[1])
-                pd.blocked = self._is_movement_blocked(vp)
-
+                pd.blocked = self._is_movement_blocked(piece)
 
     def process(self, world, componentsets):
-        for vp, pd in componentsets:
-
-            pd.blocked = self._is_movement_blocked(vp)
-            piece_rotated = (vp.rot != pd.rot)
+        for pc, in componentsets:
+            pd, vp = pc.piecedata, pc.virtualpiece
+            pd.blocked = self._is_movement_blocked(pc)
 
             # Wall kick implementation
-            if pd.blocked and piece_rotated:
-                self._wall_kick(vp, pd)
+            if pd.blocked and pc.is_rotated():
+                self._wall_kick(pc)
 
             if pd.blocked:
                 # Virtual piece reset back to actual piece
-                vp.x = pd.x
-                vp.y = pd.y
-
-                vp.shape = pd.shape
-                vp.rot = pd.rot
+                pc.reset_virtual_piece()
 
             else:
                 # Piece is free to change position. Actual piece gets
                 # position of virtual piece
-                pd.x = vp.x
-                pd.y = vp.y
-                pd.shape = vp.shape
-                pd.rot = vp.rot
+                pc.accept_virtual_piece()
                 # Find the position of ghost piece moving down the virtual
                 # until it is blocked, then move back the virtual piece
                 old_y = vp.y
                 while not pd.blocked:
-                    pd.blocked = self._is_movement_blocked(vp)
+                    pd.blocked = self._is_movement_blocked(pc)
                     vp.y += 1
                 pd.ghost_y = vp.y-1
                 vp.y = old_y
@@ -109,6 +102,11 @@ class VirtualPiece(object):
         self.shape = self.rotmap[self.rot]
         self.x = posx
         self.y = posy
+
+    def copy_same_type_piece(self, piece):
+        self.x, self.y = piece.x, piece.y
+        self.shape = piece.shape
+        self.rot = piece.rot
 
 
 class PieceData(VirtualPiece):
@@ -161,6 +159,15 @@ class Piece(sdl2.ext.Entity):
             rotation, rotationmap, color, piecetype, posx, posy, rotpos)
         self.virtualpiece = VirtualPiece(
             rotation, rotationmap, color, piecetype, posx, posy, rotpos)
+
+    def is_rotated(self):
+        return (self.virtualpiece.rot != self.piecedata.rot)
+
+    def reset_virtual_piece(self):
+        self.virtualpiece.copy_same_type_piece(self.piecedata)
+
+    def accept_virtual_piece(self):
+        self.piecedata.copy_same_type_piece(self.virtualpiece)
 
     def move(self, mx=0, my=0):
         self.virtualpiece.x += mx

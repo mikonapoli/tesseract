@@ -38,7 +38,8 @@ class Tesseract(object):
             int(window.size[1] / 2) + 10, 4 * step, 4 * step))
 
         self.piecefactory = PC.PieceFactory()
-        self.virtual_piece_checker = PC.VirtualPieceChecker(self.board)
+        self.virtual_piece_checker = PC.CollisionSystem()
+        self.virtual_piece_checker.board = self.board
 
         self.current_piece = self.piecefactory.spawn_piece(self.world)
         self.board.piece = self.current_piece
