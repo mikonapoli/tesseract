@@ -4,3 +4,6 @@ verify_ssl = true
 
 [packages]
 PySDL2 = "*"
+
+[dev-packages]
+behave = "*"
