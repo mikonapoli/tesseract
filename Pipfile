@@ -7,3 +7,4 @@ PySDL2 = "*"
 
 [dev-packages]
 behave = "*"
+nose = "*"
