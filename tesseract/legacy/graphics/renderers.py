@@ -7,7 +7,7 @@ class BoardRenderer(sdl2.ext.Renderer):
                  board_object, hidden_rows=2, center=False):
         super(BoardRenderer, self).__init__(board_surface)
         self.board = board_object
-        self.bsize = self.board.get_board_size()
+        self.bsize = self.board.get_size()
         self.hid = hidden_rows
 
         self.centered = center

@@ -1,6 +1,6 @@
 import sdl2
 from sdl2.ext import init as init_graphic_system
-from sdl2.ext import Window, subsurface, fill
+from sdl2.ext import Window, World, subsurface, fill
 
 import legacy.graphics.renderers as GS
 import legacy.graphics.constants as CONST
@@ -42,17 +42,15 @@ class WindowSystem():
                                               4 * step)
                                              )
 
+        self.window.show()
 
-class Tesseract(object):
+
+class GameWorld():
 
     def __init__(self):
-        self.world = sdl2.ext.World()
+        self.world = World()
         self.board = BD.Board(self.world)
         self.board_updater = BD.BoardUpdater()
-        bsize = self.board.get_board_size()
-
-        self.ws = WindowSystem(bsize)
-        self.window, self.background = self.ws.window, self.ws.background
 
         self.piecefactory = PC.PieceFactory()
         self.virtual_piece_checker = PC.CollisionSystem()
@@ -64,76 +62,84 @@ class Tesseract(object):
         self.world.add_system(self.virtual_piece_checker)
         self.world.add_system(self.board_updater)
 
-        self.window.show()
+        self.np_board = BD.Board(self.world,
+                                 [[0, 0, 0, 0], [0, 0, 0, 0],
+                                  [0, 0, 0, 0], [0, 0, 0, 0]])
 
-        self.boardrenderer = GS.BoardRenderer(self.ws.board_surface,
-                                              self.board)
-
-        self.np_board = BD.Board(self.world, [[0, 0, 0, 0], [0, 0, 0, 0], [
-            0, 0, 0, 0], [0, 0, 0, 0]])
-
-        self.next_piece_renderer = GS.BoardRenderer(self.ws.next_piece_surface,
-                                                    self.np_board, 0, True)
-
-        self.boardrenderer.render_board(self.current_piece)
         self.next_piece = self.piecefactory.get_next_piece(self.world)
         self.np_board.piece = self.next_piece
 
+
+class Tesseract():
+
+    def __init__(self):
+        self.gw = GameWorld()
+
+        bsize = self.gw.board.get_size()
+
+        self.ws = WindowSystem(bsize)
+        self.window, self.background = self.ws.window, self.ws.background
+
+        self.boardrenderer = GS.BoardRenderer(self.ws.board_surface,
+                                              self.gw.board)
+
+        self.next_piece_renderer = GS.BoardRenderer(self.ws.next_piece_surface,
+                                                    self.gw.np_board, 0, True)
+        self.boardrenderer.render_board(self.gw.current_piece)
+
     def process_input(self):
         events = sdl2.ext.get_events()
-        running = True
+        stopped = False
         for event in events:
             if event.type == sdl2.SDL_QUIT:
-                running = False
-                break
+                stopped = True
             if event.type == sdl2.SDL_KEYDOWN:
                 if event.key.keysym.sym == sdl2.SDLK_ESCAPE:
-                    running = False
-                    break
+                    stopped = True
                 if event.key.keysym.sym == sdl2.SDLK_RIGHT:
-                    self.current_piece.move_right()
+                    self.gw.current_piece.move_right()
 
                 if event.key.keysym.sym == sdl2.SDLK_LEFT:
-                    self.current_piece.move_left()
+                    self.gw.current_piece.move_left()
 
                 if event.key.keysym.sym == sdl2.SDLK_UP:
-                    self.current_piece.rotate()
+                    self.gw.current_piece.rotate()
 
                 if event.key.keysym.sym == sdl2.SDLK_DOWN:
-                    self.current_piece.drop()
-        return running
+                    self.gw.current_piece.drop()
+        return not stopped
 
     def update(self):
         if sdl2.SDL_GetTicks() - self.last_time >= 1000:
-            self.current_piece.move_down()
+            self.gw.current_piece.move_down()
 
-            self.world.process()
+            self.gw.world.process()
 
-            if self.current_piece.piecedata.blocked:
-                self.board.boardstatus.to_update = True
-                self.world.process()
-                self.current_piece.delete()
-                self.current_piece = self.piecefactory.spawn_piece(
-                    self.world)
+            if self.gw.current_piece.piecedata.blocked:
+                self.gw.board.boardstatus.to_update = True
+                self.gw.world.process()
+                self.gw.current_piece.delete()
+                self.gw.current_piece = self.gw.piecefactory.spawn_piece(
+                    self.gw.world)
 
-                self.board.piece = self.current_piece
+                self.gw.board.piece = self.gw.current_piece
 
-                self.next_piece.delete()
-                self.next_piece = self.piecefactory.get_next_piece(
-                    self.world)
-                self.np_board.piece = self.next_piece
+                self.gw.next_piece.delete()
+                self.gw.next_piece = self.gw.piecefactory.get_next_piece(
+                    self.gw.world)
+                self.gw.np_board.piece = self.gw.next_piece
 
-            self.world.process()
+            self.gw.world.process()
             self.last_time = sdl2.SDL_GetTicks()
 
-        self.world.process()
+        self.gw.world.process()
 
     def render(self):
         fill(self.ws.background, CONST.BLACK)
         fill(self.ws.board_background, CONST.GREY)
 
-        self.boardrenderer.render_board(self.current_piece)
-        self.next_piece_renderer.render_board(self.next_piece)
+        self.boardrenderer.render_board(self.gw.current_piece)
+        self.next_piece_renderer.render_board(self.gw.next_piece)
         self.window.refresh()
 
     def run(self):

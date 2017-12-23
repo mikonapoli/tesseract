@@ -54,5 +54,5 @@ class Board(sdl2.ext.Entity):
         self.boardstatus = BoardStatus(map)
         self.piece = None
 
-    def get_board_size(self):
+    def get_size(self):
         return (self.boardstatus.columns, self.boardstatus.rows)

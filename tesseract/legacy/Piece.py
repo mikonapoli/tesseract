@@ -14,7 +14,7 @@ class CollisionSystem(sdl2.ext.Applicator):
 
     def _out_of_board(self, piece):
         vp = piece.virtualpiece
-        board_size = self.board.get_board_size()
+        board_size = self.board.get_size()
         if (vp.x + vp.bbox[vp.rot][0] < 0 or
             vp.x + vp.bbox[vp.rot][1] >=
             board_size[0] or
