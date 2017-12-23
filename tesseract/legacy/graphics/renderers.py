@@ -1,5 +1,5 @@
 import sdl2.ext
-import graphics.constants as CONST
+import legacy.graphics.constants as CONST
 
 
 class BoardRenderer(sdl2.ext.Renderer):
