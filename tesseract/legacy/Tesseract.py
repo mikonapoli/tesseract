@@ -4,8 +4,8 @@ from sdl2.ext import Window, World, subsurface, fill
 
 import legacy.graphics.renderers as GS
 import legacy.graphics.constants as CONST
-import legacy.Piece as PC
-import legacy.Board as BD
+from . import Piece as PC
+from . import Board as BD
 
 
 class WindowSystem():
@@ -63,39 +63,56 @@ class GameWorld():
         self.world.add_system(self.board_updater)
 
         self.np_board = BD.Board(self.world,
-                                 [[0, 0, 0, 0], [0, 0, 0, 0],
-                                  [0, 0, 0, 0], [0, 0, 0, 0]])
+                                 [[0, 0, 0, 0],
+                                  [0, 0, 0, 0],
+                                  [0, 0, 0, 0],
+                                  [0, 0, 0, 0]])
 
         self.next_piece = self.piecefactory.get_next_piece(self.world)
         self.np_board.piece = self.next_piece
 
 
-class Tesseract():
+class GraphicSystem():
 
-    def __init__(self):
-        self.gw = GameWorld()
-
-        bsize = self.gw.board.get_size()
-
-        self.ws = WindowSystem(bsize)
-        self.window, self.background = self.ws.window, self.ws.background
+    def __init__(self, window_system, game_world):
+        self.ws = window_system
+        self.gw = game_world
 
         self.boardrenderer = GS.BoardRenderer(self.ws.board_surface,
                                               self.gw.board)
 
         self.next_piece_renderer = GS.BoardRenderer(self.ws.next_piece_surface,
                                                     self.gw.np_board, 0, True)
+
         self.boardrenderer.render_board(self.gw.current_piece)
+
+    def render_background(self):
+        fill(self.ws.background, CONST.BLACK)
+        fill(self.ws.board_background, CONST.GREY)
+
+    def render_game_world(self):
+        self.boardrenderer.render_board(self.gw.current_piece)
+        self.next_piece_renderer.render_board(self.gw.next_piece)
+
+    def render(self):
+        self.render_background()
+        self.render_game_world()
+
+        self.ws.window.refresh()
+
+
+class InputSystem():
+    def __init__(self):
+        self.stopped = False
 
     def process_input(self):
         events = sdl2.ext.get_events()
-        stopped = False
         for event in events:
             if event.type == sdl2.SDL_QUIT:
-                stopped = True
+                self.stopped = True
             if event.type == sdl2.SDL_KEYDOWN:
                 if event.key.keysym.sym == sdl2.SDLK_ESCAPE:
-                    stopped = True
+                    self.stopped = True
                 if event.key.keysym.sym == sdl2.SDLK_RIGHT:
                     self.gw.current_piece.move_right()
 
@@ -107,7 +124,21 @@ class Tesseract():
 
                 if event.key.keysym.sym == sdl2.SDLK_DOWN:
                     self.gw.current_piece.drop()
-        return not stopped
+        return not self.stopped
+
+
+class Tesseract():
+
+    def __init__(self):
+        self.gw = GameWorld()
+
+        bsize = self.gw.board.get_size()
+
+        self.ws = WindowSystem(bsize)
+
+        self.gs = GraphicSystem(self.ws, self.gw)
+
+        self.ins = InputSystem()
 
     def update(self):
         if sdl2.SDL_GetTicks() - self.last_time >= 1000:
@@ -134,19 +165,11 @@ class Tesseract():
 
         self.gw.world.process()
 
-    def render(self):
-        fill(self.ws.background, CONST.BLACK)
-        fill(self.ws.board_background, CONST.GREY)
-
-        self.boardrenderer.render_board(self.gw.current_piece)
-        self.next_piece_renderer.render_board(self.gw.next_piece)
-        self.window.refresh()
-
     def run(self):
         running = True
         self.last_time = sdl2.SDL_GetTicks()
         while running:
-            running = self.process_input()
+            running = self.ins.process_input()
             self.update()
-            self.render()
+            self.gs.render()
         return 0
