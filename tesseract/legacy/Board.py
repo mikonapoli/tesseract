@@ -49,9 +49,9 @@ class BoardUpdater(sdl2.ext.Applicator):
 
 
 class Board(sdl2.ext.Entity):
-    def __init__(self, world, map=DEFAULT_BOARD):
+    def __init__(self, world, bmap=DEFAULT_BOARD):
         super(Board, self).__init__()
-        self.boardstatus = BoardStatus(map)
+        self.boardstatus = BoardStatus(bmap)
         self.piece = None
 
     def get_size(self):

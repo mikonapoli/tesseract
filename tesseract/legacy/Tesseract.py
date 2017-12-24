@@ -70,6 +70,32 @@ class GameWorld():
 
         self.next_piece = self.piecefactory.get_next_piece(self.world)
         self.np_board.piece = self.next_piece
+        self.last_time = sdl2.SDL_GetTicks()
+
+    def update(self):
+        if sdl2.SDL_GetTicks() - self.last_time >= 1000:
+            self.current_piece.move_down()
+
+            self.world.process()
+
+            if self.current_piece.piecedata.blocked:
+                self.board.boardstatus.to_update = True
+                self.world.process()
+                self.current_piece.delete()
+                self.current_piece = self.piecefactory.spawn_piece(
+                    self.world)
+
+                self.board.piece = self.current_piece
+
+                self.next_piece.delete()
+                self.next_piece = self.piecefactory.get_next_piece(
+                    self.world)
+                self.np_board.piece = self.next_piece
+
+            self.world.process()
+            self.last_time = sdl2.SDL_GetTicks()
+
+        self.world.process()
 
 
 class GraphicSystem():
@@ -102,8 +128,9 @@ class GraphicSystem():
 
 
 class InputSystem():
-    def __init__(self):
+    def __init__(self, game_world):
         self.stopped = False
+        self.gw = game_world
 
     def process_input(self):
         events = sdl2.ext.get_events()
@@ -127,7 +154,7 @@ class InputSystem():
         return not self.stopped
 
 
-class Tesseract():
+class Game():
 
     def __init__(self):
         self.gw = GameWorld()
@@ -138,38 +165,13 @@ class Tesseract():
 
         self.gs = GraphicSystem(self.ws, self.gw)
 
-        self.ins = InputSystem()
-
-    def update(self):
-        if sdl2.SDL_GetTicks() - self.last_time >= 1000:
-            self.gw.current_piece.move_down()
-
-            self.gw.world.process()
-
-            if self.gw.current_piece.piecedata.blocked:
-                self.gw.board.boardstatus.to_update = True
-                self.gw.world.process()
-                self.gw.current_piece.delete()
-                self.gw.current_piece = self.gw.piecefactory.spawn_piece(
-                    self.gw.world)
-
-                self.gw.board.piece = self.gw.current_piece
-
-                self.gw.next_piece.delete()
-                self.gw.next_piece = self.gw.piecefactory.get_next_piece(
-                    self.gw.world)
-                self.gw.np_board.piece = self.gw.next_piece
-
-            self.gw.world.process()
-            self.last_time = sdl2.SDL_GetTicks()
-
-        self.gw.world.process()
+        self.ins = InputSystem(self.gw)
 
     def run(self):
         running = True
-        self.last_time = sdl2.SDL_GetTicks()
+        self.gw.last_time = sdl2.SDL_GetTicks()
         while running:
             running = self.ins.process_input()
-            self.update()
+            self.gw.update()
             self.gs.render()
         return 0
