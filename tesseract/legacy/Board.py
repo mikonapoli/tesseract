@@ -1,6 +1,6 @@
-import sdl2.ext
-from legacy.constants import DEFAULT_BOARD
-from legacy.Piece import Piece
+import sdl2.ext  # type: ignore
+from .constants import DEFAULT_BOARD
+from .Piece import Piece
 
 
 class BoardStatus(object):

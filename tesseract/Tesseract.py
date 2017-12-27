@@ -1,7 +1,6 @@
 import sys
-from legacy.Tesseract import Game
-
+from .legacy import Tesseract
 
 if __name__ == "__main__":
-    game = Game()
+    game = Tesseract.Game()
     sys.exit(game.run())

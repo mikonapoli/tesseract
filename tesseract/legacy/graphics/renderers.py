@@ -1,5 +1,5 @@
-import sdl2.ext
-import legacy.graphics.constants as CONST
+import sdl2.ext  # type: ignore
+from . import constants as CONST
 
 
 class BoardRenderer(sdl2.ext.Renderer):
@@ -52,10 +52,12 @@ class BoardRenderer(sdl2.ext.Renderer):
                 if s != 0:
                     # Render the ghost piece
                     to_fill.append(
-                        ((pos_x + (piece.piecedata.x + x) *
-                          self.hstep, pos_y +
+                        ((pos_x +
+                          (piece.piecedata.x + x) * self.hstep,
+                          pos_y +
                           ((piece.piecedata.ghost_y - 3) + y) * self.vstep,
-                          self.hstep, self.vstep), 9))
+                          self.hstep,
+                          self.vstep), 9))
                     # Render the actual piece
                     if piece.piecedata.y + y >= 2:
                         to_fill.append(

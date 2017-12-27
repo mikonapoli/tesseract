@@ -1,9 +1,9 @@
-import sdl2
-from sdl2.ext import init as init_graphic_system
-from sdl2.ext import Window, World, subsurface, fill
+import sdl2  # type: ignore
+from sdl2.ext import init as init_graphic_system  # type: ignore
+from sdl2.ext import Window, World, subsurface, fill  # type: ignore
 
-import legacy.graphics.renderers as GS
-import legacy.graphics.constants as CONST
+from .graphics import renderers as GS
+from .graphics import constants as CONST
 from . import Piece as PC
 from . import Board as BD
 

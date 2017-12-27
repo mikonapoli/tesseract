@@ -1,5 +1,5 @@
-import sdl2.ext
-from legacy.constants import PIECES, WALL_KICK
+import sdl2.ext  # type: ignore
+from .constants import PIECES, WALL_KICK
 from random import random
 
 # TODO: this should be a component, not a System.
