@@ -3,7 +3,7 @@ init:
 	pipenv install --dev
 
 test:
-	pipenv run mypy .
+	export MYPYPATH=$$PWD/tesseract; pipenv run mypy .
 	pipenv run nosetests
 
 accept:
