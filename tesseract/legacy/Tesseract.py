@@ -8,7 +8,7 @@ from . import Piece as PC
 from . import Board as BD
 
 
-class WindowSystem():
+class WindowSystem:
 
     def __init__(self, board_size):
         init_graphic_system()
@@ -45,7 +45,7 @@ class WindowSystem():
         self.window.show()
 
 
-class GameWorld():
+class GameWorld:
 
     def __init__(self):
         self.world = World()
@@ -78,7 +78,7 @@ class GameWorld():
 
             self.world.process()
 
-            if self.current_piece.piecedata.blocked:
+            if self.current_piece.status.blocked:
                 self.board.boardstatus.to_update = True
                 self.world.process()
                 self.current_piece.delete()
@@ -98,7 +98,7 @@ class GameWorld():
         self.world.process()
 
 
-class GraphicSystem():
+class GraphicSystem:
 
     def __init__(self, window_system, game_world):
         self.ws = window_system
@@ -127,7 +127,7 @@ class GraphicSystem():
         self.ws.window.refresh()
 
 
-class InputSystem():
+class InputSystem:
     def __init__(self, game_world):
         self.stopped = False
         self.gw = game_world
@@ -154,7 +154,7 @@ class InputSystem():
         return not self.stopped
 
 
-class Game():
+class Game:
 
     def __init__(self):
         self.gw = GameWorld()

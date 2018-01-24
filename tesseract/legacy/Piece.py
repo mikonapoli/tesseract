@@ -13,12 +13,13 @@ class CollisionSystem(sdl2.ext.Applicator):
         self.board = None
 
     def _out_of_board(self, piece):
-        vp = piece.virtualpiece
+        vp = piece.virtualstatus
+        vbb = piece.get_virtual_bounding_box()
         board_size = self.board.get_size()
-        if (vp.x + vp.bbox[vp.rot][0] < 0 or
-            vp.x + vp.bbox[vp.rot][1] >=
+        if (vp.x + vbb[0] < 0 or
+            vp.x + vbb[1] >=
             board_size[0] or
-                vp.y + vp.bbox[vp.rot][2] >=
+                vp.y + vbb[2] >=
                 board_size[1]):
 
             return True
@@ -27,12 +28,12 @@ class CollisionSystem(sdl2.ext.Applicator):
             return False
 
     def _board_collision(self, piece):
-        vp = piece.virtualpiece
+        vp = piece.virtualstatus
         collision = False
-        bbox = vp.bbox[vp.rot]
+        bbox = piece.get_virtual_bounding_box()
         for i in range(bbox[0], bbox[1] + 1):
             for j in range(bbox[2] + 1):
-                if (vp.shape[j][i] != 0 and
+                if (piece.get_virtual_shape()[j][i] != 0 and
                         self.board.boardstatus.map[vp.y + j]
                         [vp.x + i] != 0):
                     collision = True
@@ -43,11 +44,11 @@ class CollisionSystem(sdl2.ext.Applicator):
         return self._out_of_board(piece) or self._board_collision(piece)
 
     def _wall_kick(self, piece):
-        vp, pd = piece.virtualpiece, piece.piecedata
+        vp, pd = piece.virtualstatus, piece.status
         # Wall kick
         kickmap = WALL_KICK["X"]
-        if pd.type in WALL_KICK:
-            kickmap = WALL_KICK[pd.type]
+        if piece.piecedata.type in WALL_KICK:
+            kickmap = WALL_KICK[piece.piecedata.type]
         # Left or right rotation
         if vp.rot - pd.rot in (1, -3):
             rotation_type = 1
@@ -64,7 +65,7 @@ class CollisionSystem(sdl2.ext.Applicator):
 
     def process(self, world, componentsets):
         for pc, in componentsets:
-            pd, vp = pc.piecedata, pc.virtualpiece
+            pd, vp = pc.status, pc.virtualstatus
             pd.blocked = self._is_movement_blocked(pc)
 
             # Wall kick implementation
@@ -90,34 +91,93 @@ class CollisionSystem(sdl2.ext.Applicator):
                 pd.blocked = False
 
 
-class VirtualPiece(object):
-    def __init__(self, rotation, rotation_map, color,
-                 piecetype, posx, posy, bounding_box, virtual=False):
-
+class VirtualStatus:
+    def __init__(self, rotation, x, y):
         self.rot = rotation
-        self.type = piecetype
-        self.rotmap = rotation_map
-        self.bbox = bounding_box
-        self.color_code = color
-        self.shape = self.rotmap[self.rot]
-        self.x = posx
-        self.y = posy
+        self.x = x
+        self.y = y
 
-    def copy_same_type_piece(self, piece):
-        self.x, self.y = piece.x, piece.y
-        self.shape = piece.shape
-        self.rot = piece.rot
+    def copy_status(self, status):
+        self.rot = status.rot
+        self.x = status.x
+        self.y = status.y
 
 
-class PieceData(VirtualPiece):
-    def __init__(self, rotation, rotation_map, color,
-                 piecetype, posx, posy, bounding_box):
-        super(PieceData, self).__init__(rotation, rotation_map,
-                                        color, piecetype, posx, posy,
-                                        bounding_box)
+class Status(VirtualStatus):
+    def __init__(self, rotation, x, y):
+        super(Status, self).__init__(rotation, x, y)
         self.blocked = False
         self.moved = False
         self.ghost_y = 0
+
+
+class PieceData:
+    def __init__(self, rotation_map, piece_type, color_code, bbox):
+        self.rot_map = rotation_map
+        self.color_code = color_code
+        self.type = piece_type
+        self.b_box = bbox
+
+
+class Piece(sdl2.ext.Entity):
+    def __init__(self, world, piecetype, posx, posy,
+                 rotation, rotationmap, color, rotpos):
+        super(Piece, self).__init__()
+        self.piecedata = PieceData(rotationmap, piecetype, color, rotpos)
+        self.status = Status(rotation, posx, posy)
+        self.virtualstatus = VirtualStatus(rotation, posx, posy)
+
+    def get_shape(self, status=None):
+        if status is None:
+            status = self.status
+        return self.piecedata.rot_map[status.rot]
+
+    def get_virtual_shape(self):
+        return self.get_shape(self.virtualstatus)
+
+    def get_bounding_box(self, status=None):
+        if status is None:
+            status = self.status
+        return self.piecedata.b_box[status.rot]
+
+    def get_virtual_bounding_box(self):
+        return self.get_bounding_box(self.virtualstatus)
+
+    def is_rotated(self):
+        return (self.virtualstatus.rot != self.status.rot)
+
+    def reset_virtual_piece(self):
+        self.virtualstatus.copy_status(self.status)
+
+    def accept_virtual_piece(self):
+        self.status.copy_status(self.virtualstatus)
+
+    def move(self, mx=0, my=0):
+        self.virtualstatus.x += mx
+        self.virtualstatus.y += my
+        self.piecedata.moved = True
+
+    def move_left(self):
+        self.move(mx=-1)
+
+    def move_right(self):
+        self.move(mx=1)
+
+    def move_down(self):
+        self.move(my=1)
+
+    def drop(self):
+        self.virtualstatus.y = self.status.ghost_y - 1
+        self.status.moved = True
+
+    def rotate(self, mov=1):
+        new_index = (self.virtualstatus.rot +
+                     mov) % len(self.piecedata.rot_map)
+
+        self.virtualstatus.rot = new_index
+
+    def rotate_left(self):
+        self.rotate(-1)
 
 
 class PieceFactory:
@@ -149,51 +209,3 @@ class PieceFactory:
         piece = Piece(world, cat_entry[0], x_pos, y_pos, 0,
                       cat_entry[1], cat_entry[2], cat_entry[3])
         return piece
-
-
-class Piece(sdl2.ext.Entity):
-    def __init__(self, world, piecetype, posx, posy,
-                 rotation, rotationmap, color, rotpos):
-        super(Piece, self).__init__()
-        self.piecedata = PieceData(
-            rotation, rotationmap, color, piecetype, posx, posy, rotpos)
-        self.virtualpiece = VirtualPiece(
-            rotation, rotationmap, color, piecetype, posx, posy, rotpos)
-
-    def is_rotated(self):
-        return (self.virtualpiece.rot != self.piecedata.rot)
-
-    def reset_virtual_piece(self):
-        self.virtualpiece.copy_same_type_piece(self.piecedata)
-
-    def accept_virtual_piece(self):
-        self.piecedata.copy_same_type_piece(self.virtualpiece)
-
-    def move(self, mx=0, my=0):
-        self.virtualpiece.x += mx
-        self.virtualpiece.y += my
-        self.piecedata.moved = True
-
-    def move_left(self):
-        self.move(mx=-1)
-
-    def move_right(self):
-        self.move(mx=1)
-
-    def move_down(self):
-        self.move(my=1)
-
-    def drop(self):
-        self.virtualpiece.y = self.piecedata.ghost_y - 1
-        self.piecedata.moved = True
-
-    def rotate(self, mov=1):
-        new_index = (self.virtualpiece.rot +
-                     mov) % len(self.virtualpiece.rotmap)
-
-        self.virtualpiece.rot = new_index
-        self.virtualpiece.shape = self.virtualpiece.rotmap[
-            new_index]
-
-    def rotate_left(self):
-        self.rotate(-1)

@@ -63,33 +63,33 @@ class BoardRenderer(sdl2.ext.Renderer):
     def paint_shape(self, piece, ccode=None):
         if ccode is None:
             ccode = piece.piecedata.color_code
-        shape = piece.piecedata.shape
+        shape = piece.get_shape()
         painted_shape = [[i*ccode for i in line] for line in shape]
         return painted_shape
 
     def render_piece(self, piece, is_ghost=False):
-        bbox = piece.piecedata.bbox[piece.piecedata.rot]
+        bbox = piece.get_bounding_box()
         if self.draw_in_the_center:
             pos_x, pos_y = self._compute_centered_position(piece, bbox)
         else:
             pos_x, pos_y = (0, 0)
         if is_ghost:
             shape_to_paint = self.paint_shape(piece, ccode=9)
-            piece_y = piece.piecedata.ghost_y - 1
+            piece_y = piece.status.ghost_y - 1
         else:
             shape_to_paint = self.paint_shape(piece)
-            piece_y = piece.piecedata.y
+            piece_y = piece.status.y
 
         for x in range(bbox[1] + 1):
             for y in range(bbox[2] + 1):
-                p_x = piece.piecedata.x + x
+                p_x = piece.status.x + x
                 p_y = piece_y + y
                 p_code = shape_to_paint[y][x]
                 if p_y >= self.hid:
                     self._render_blocks(pos_x, pos_y, p_x, p_y, p_code)
 
     def render_board(self, piece):
-        bbox = piece.piecedata.bbox[piece.piecedata.rot]
+        bbox = piece.get_bounding_box()
         pos_x = 0
         pos_y = 0
         if self.draw_in_the_center:

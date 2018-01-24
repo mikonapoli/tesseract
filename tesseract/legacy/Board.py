@@ -19,12 +19,12 @@ class BoardUpdater(sdl2.ext.Applicator):
         self.componenttypes = [BoardStatus, Piece]
 
     def _update_board_status(self, piece, boardstatus):
-        bbox = piece.piecedata.bbox[piece.piecedata.rot]
+        bbox = piece.get_bounding_box()
         for i in range(bbox[2] + 1):
             for j in range(bbox[0], bbox[1] + 1):
-                a = piece.piecedata.shape[i][j]
-                pos_x = piece.piecedata.x
-                pos_y = piece.piecedata.y
+                a = piece.get_shape()[i][j]
+                pos_x = piece.status.x
+                pos_y = piece.status.y
                 if a != 0:
                     ccode = piece.piecedata.color_code
                     boardstatus.map[i + pos_y][j + pos_x] = ccode
