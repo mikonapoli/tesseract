@@ -8,3 +8,6 @@ test:
 
 accept:
 	pipenv run behave
+
+run:
+	pipenv run python tesseract/Tesseract.py
