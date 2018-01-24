@@ -1,30 +1,38 @@
 import unittest
-from tesseract.board import Board
+from tesseract.well import Well
 
 
-class TestNewBoard(unittest.TestCase):
+class TestNewWell(unittest.TestCase):
     def test_size(self):
-        board = Board(3, 3)
-        board_size = board.get_size()
-        self.assertEqual((3, 3), board_size)
+        well = Well(3, 3)
+        well_size = well.get_size()
+        self.assertEqual((3, 3), well_size)
 
     def test_is_empty(self):
-        b = Board(3, 3)
+        b = Well(3, 3)
         self.assertTrue(b.is_empty())
 
+    def test_height(self):
+        well = Well(5, 3)
+        self.assertEqual(well.get_height(), 5)
 
-class TestBoard(unittest.TestCase):
-    def test_get_size_returns_size_of_board_map(self):
-        board = Board(2, 2)
-        board.map = [[0, 0],
-                     [0, 0],
-                     [0, 0]]
-        board_size = board.get_size()
-        self.assertEqual((3, 2), board_size)
+    def test_width(self):
+        well = Well(5, 9)
+        self.assertEqual(well.get_width(), 9)
 
-    def test_full_board_is_not_empty(self):
-        board = Board(2, 2)
-        board.map = [[1, 0],
-                     [1, 1],
-                     [0, 0]]
-        self.assertFalse(board.is_empty())
+
+class TestWell(unittest.TestCase):
+    def test_get_size_returns_size_of_well_map(self):
+        well = Well(2, 2)
+        well.stack = [[0, 0],
+                      [0, 0],
+                      [0, 0]]
+        well_size = well.get_size()
+        self.assertEqual((3, 2), well_size)
+
+    def test_full_well_is_not_empty(self):
+        well = Well(2, 2)
+        well.stack = [[1, 0],
+                      [1, 1],
+                      [0, 0]]
+        self.assertFalse(well.is_empty())
