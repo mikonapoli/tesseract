@@ -1,8 +1,8 @@
 class GameState():
     name: str
 
-    def __init__(self, name: str = "Generic State") -> None:
-        self.name = name
+    def __init__(self, namestr: str = "Generic State") -> None:
+        self.name = namestr
 
 
 class RunningState(GameState):
