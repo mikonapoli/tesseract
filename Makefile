@@ -9,5 +9,8 @@ test:
 accept:
 	pipenv run behave
 
+unit:
+	pipenv run nosetests
+
 run:
 	pipenv run python tesseract/Tesseract.py
