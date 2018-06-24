@@ -1,12 +1,8 @@
 import pygame
 
-
-class Tesseract(object):
-    def __init__(self):
-        self.screen = self._init_window_system()
-        self._setup_main_screen()
-
-    def _init_window_system(self):
+class WindowSystem():
+    @staticmethod
+    def initialise():
         """Initialises the windowing system and returns the main surface"""
         pygame.init()
         pygame.display.set_caption("TESSERACT: A Tetris clone")
@@ -19,6 +15,12 @@ class Tesseract(object):
         pygame.display.update()
 
         return screen
+        
+
+class Tesseract(object):
+    def __init__(self):
+        self.screen = WindowSystem.initialise()
+        self._setup_main_screen()
 
     def _setup_main_screen(self):
         title = """
