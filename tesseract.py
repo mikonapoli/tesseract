@@ -1,7 +1,7 @@
 import pygame
 
 
-class Game(object):
+class Tesseract(object):
     def __init__(self):
         self.screen = self._init_window_system()
         self._setup_main_screen()
@@ -64,4 +64,4 @@ class Game(object):
 
 
 if __name__ == "__main__":
-    Game().run()
+    Tesseract().run()
