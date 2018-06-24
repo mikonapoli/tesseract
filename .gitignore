@@ -4,4 +4,4 @@ tesseract/\.DS_Store
 \.DS_Store
 
 \.mypy_cache/
-.vscode/settings.json
+.vscode/*
