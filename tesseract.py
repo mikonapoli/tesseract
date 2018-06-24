@@ -21,8 +21,12 @@ class Game(object):
         return screen
 
     def _setup_main_screen(self):
-        title = """TESSERACT: A Tetris clone\nPress [ESC] to exit"""
-        self.render_text_on_surface(self.screen, title)
+        title = """
+        TESSERACT
+
+        Press [ESC] to exit
+        """
+        self.render_message_on_surface(self.screen, title)
 
     def get_center(self, surface):
         x = int(surface.get_width() / 2)
@@ -35,12 +39,17 @@ class Game(object):
         text_surface = text_surface.convert_alpha()
         return text_surface
 
-    def render_text_on_surface(self, writing_surface, text, size=48):
-        x, y = self.get_center(writing_surface)
-        text_surface = self.write_text(text, size)
-        x -= int(text_surface.get_width() / 2)
-        y -= int(text_surface.get_height() / 2)
-        writing_surface.blit(text_surface, (x, y))
+    def render_message_on_surface(self, writing_surface, msg, size=64):
+        lines = msg.split('\n')
+        lines_surfaces = [self.write_text(line, size) for line in lines]
+        text = msg
+        cx, cy = self.get_center(writing_surface)
+        y_offset = int(sum((ts.get_height() for ts in lines_surfaces)) * 0.55)
+        y = cy - y_offset
+        for text_surface in lines_surfaces:
+            x = cx - int(text_surface.get_width() * 0.5)
+            writing_surface.blit(text_surface, (x, y))
+            y += int(text_surface.get_height() * 1.1)
         pygame.display.flip()
 
     def run(self):
