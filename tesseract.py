@@ -3,14 +3,25 @@ import pygame
 
 class Game(object):
     def __init__(self):
+        self.screen = self._init_window_system()
+
+    def _init_window_system(self):
+        """Initialises the windowing system and returns the main surface"""
         pygame.init()
         pygame.display.set_caption("TESSERACT: A Tetris clone")
 
-        screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
-        screen.fill((0, 0, 0))
         pygame.mouse.set_visible(False)
 
+        screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
+        screen.fill((0, 0, 0))
         pygame.display.update()
+
+        return screen
+
+    def get_center(self, surface):
+        x = int(surface.get_width() / 2)
+        y = int(surface.get_height() / 2)
+        return (x, y)
 
     def run(self):
         running = True
