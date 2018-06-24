@@ -1,5 +1,6 @@
 import pygame
 
+
 class WindowSystem(object):
     @staticmethod
     def initialise():
@@ -15,12 +16,13 @@ class WindowSystem(object):
         pygame.display.update()
 
         return screen
-    
+
     @staticmethod
     def get_center(surface):
         x = int(surface.get_width() / 2)
         y = int(surface.get_height() / 2)
         return (x, y)
+
 
 class TextRenderer(object):
 
@@ -45,7 +47,6 @@ class TextRenderer(object):
             y += int(text_surface.get_height() * 1.1)
         pygame.display.flip()
 
-        
 
 class Tesseract(object):
     def __init__(self):
